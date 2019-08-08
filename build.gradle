@@ -1,0 +1,44 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+  }
+
+  dependencies {
+    classpath "org.elasticsearch.gradle:build-tools:${elasticsearchVersion}"
+  }
+}
+
+group = 'org.elasticsearch.plugin.ingest'
+version = "${elasticsearchVersion}.0"
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'elasticsearch.esplugin'
+
+esplugin {
+  name 'ingest-limitrep'
+  description 'Ingest processor that limit repeated documents in specific time interval'
+  classname 'org.elasticsearch.plugin.ingest.limitrep.IngestLimitrepPlugin'
+}
+
+project.licenseFile= file('LICENSE.txt')
+project.noticeFile= file('NOTICE.txt')
+
+subprojects {
+  ext.projectSubstitutions += ["org.elasticsearch.plugin.ingest:ingest-limitrep:${elasticsearchVersion}": ':ingest-limitrep:plugin']
+}
+// In this section you declare the dependencies for your production and test code
+// Note, the two dependencies are not really needed as the buildscript dependency gets them in already
+// they are just here as an example
+dependencies {
+  compile "org.elasticsearch:elasticsearch:${elasticsearchVersion}"
+
+  testCompile "org.elasticsearch.test:framework:${elasticsearchVersion}"
+}
+
+dependencyLicenses.enabled = false
+
+thirdPartyAudit.enabled = false
+
