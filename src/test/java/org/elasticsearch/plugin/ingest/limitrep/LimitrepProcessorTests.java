@@ -24,19 +24,36 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.equalTo;
+
 
 public class LimitrepProcessorTests extends ESTestCase  {
 
     private static LimitrepProcessor processor;
     @BeforeClass
     public static void setupProcessor() throws IOException {
-        processor = new LimitrepProcessor("", "message");
+        FieldContentCache cache = FieldContentCacheBuilder.build(10, 1000, "SHA-1");
+        processor = new LimitrepProcessor("", "message", cache);
     }
 
-    public void testContentBeFiltered() throws Exception {
+    public void testRepeatedContentBeFiltered() throws Exception {
+        setupProcessor();
         IngestDocument ingestDocument = RandomDocumentPicks.randomIngestDocument(random(),
-                Collections.singletonMap("message", "content that should be filtered"));
+                Collections.singletonMap("message", "repeated content should be filtered"));
         IngestDocument targetIngestDocument = processor.execute(ingestDocument);
+        assertNotNull(targetIngestDocument);
+        assertThat(targetIngestDocument.getFieldValue("message", String.class), equalTo("repeated content should be filtered"));
+
+        ingestDocument = RandomDocumentPicks.randomIngestDocument(random(),
+                Collections.singletonMap("message", "test content need be long enough. test content need be long enough"));
+        targetIngestDocument = processor.execute(ingestDocument);
+        assertNotNull(targetIngestDocument);
+        assertThat(targetIngestDocument.getFieldValue("message", String.class),
+                equalTo("test content need be long enough. test content need be long enough"));
+
+        ingestDocument = RandomDocumentPicks.randomIngestDocument(random(),
+                Collections.singletonMap("message", "repeated content should be filtered"));
+        targetIngestDocument = processor.execute(ingestDocument);
         assertNull(targetIngestDocument);
     }
 

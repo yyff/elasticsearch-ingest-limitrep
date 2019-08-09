@@ -24,6 +24,7 @@ import org.elasticsearch.ingest.Processor;
 import java.io.IOException;
 import java.util.Map;
 
+import static org.elasticsearch.ingest.ConfigurationUtils.readIntProperty;
 import static org.elasticsearch.ingest.ConfigurationUtils.readStringProperty;
 
 public class LimitrepProcessor extends AbstractProcessor {
@@ -31,10 +32,12 @@ public class LimitrepProcessor extends AbstractProcessor {
     public static final String TYPE = "limitrep";
 
     private final String field;
+    private final FieldContentCache cache;
 
-    public LimitrepProcessor(String tag, String field) throws IOException {
+    public LimitrepProcessor(String tag, String field, FieldContentCache cache) throws IOException {
         super(tag);
         this.field = field;
+        this.cache = cache;
     }
 
     @Override
@@ -43,11 +46,12 @@ public class LimitrepProcessor extends AbstractProcessor {
         if (content == null) {
             return ingestDocument;
         }
-        // TODO implement me!
-        if (content.equals("content that should be filtered")) {
-            return null;
+        if (cache.get(field, content) == null) {
+            cache.put(field, content);
+            return ingestDocument;
         }
-        return ingestDocument;
+
+        return null;
     }
 
     @Override
@@ -65,8 +69,12 @@ public class LimitrepProcessor extends AbstractProcessor {
         public LimitrepProcessor create(Map<String, Processor.Factory> factories, String tag, Map<String, Object> config) 
             throws Exception {
             String field = readStringProperty(TYPE, tag, config, "field");
+            long timeInterval = readIntProperty(TYPE, tag, config, "timeInterval", 3600);
+            long cacheSize = readIntProperty(TYPE, tag, config, "cacheSize", 1024 * 1024);
+            String method = readStringProperty(TYPE, tag, config, "method", "MD5");
 
-            return new LimitrepProcessor(tag, field);
+            FieldContentCache cache = FieldContentCacheBuilder.build(cacheSize, timeInterval, method);
+            return new LimitrepProcessor(tag, field, cache);
         }
     }
 }

@@ -36,7 +36,6 @@ public class LimitrepProcessorFactoryTests extends ESTestCase {
         String processorTag = randomAlphaOfLength(10);
 
         expectThrows(ElasticsearchParseException.class, () -> factory.create(null, processorTag, config));
-//        expectThrows(Exception.class, () -> factory.create(null, processorTag, config));
     }
     public void testBuildDefaults() throws Exception {
         Map<String, Object> config = new HashMap<>();

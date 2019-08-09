@@ -22,12 +22,27 @@
         type: test
         id: 1
         pipeline: "my_pipeline"
-        body: {field1: "content that should be filtered"}
+        body: {field1: "repeated content should be filtered"}
+
+  - do:
+      index:
+        index: test
+        type: test
+        id: 2
+        pipeline: "my_pipeline"
+        body: {field1: "repeated content should be filtered"}
+
+  - do:
+      get:
+        index: test
+        type: test
+        id: 1
+  - match: { _source.field1: "repeated content should be filtered" }
 
   - do:
       catch: missing
       get:
         index: test
         type: test
-        id: 1
+        id: 2
   - match: { found: false }
