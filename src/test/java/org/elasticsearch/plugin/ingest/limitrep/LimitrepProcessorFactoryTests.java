@@ -23,6 +23,7 @@ import org.elasticsearch.test.ESTestCase;
 import java.util.HashMap;
 
 import java.util.Map;
+import java.util.regex.PatternSyntaxException;
 
 import static org.hamcrest.Matchers.equalTo;
 
@@ -31,7 +32,7 @@ public class LimitrepProcessorFactoryTests extends ESTestCase {
 
     private static final LimitrepProcessor.Factory factory = new LimitrepProcessor.Factory();
 
-    public void testWithoutRequiredFieldSettings() throws Exception {
+    public void testNoRequiredField() throws Exception {
         Map<String, Object> config = new HashMap<>();
         String processorTag = randomAlphaOfLength(10);
 
@@ -46,6 +47,39 @@ public class LimitrepProcessorFactoryTests extends ESTestCase {
         LimitrepProcessor processor = factory.create(null, processorTag, config);
         assertThat(processor.getTag(), equalTo(processorTag));
         assertThat(processor.getField(), equalTo("_field"));
+    }
+
+    public void testInvalidTimeInterval() throws Exception {
+        String processorTag = randomAlphaOfLength(10);
+        Map<String, Object> config = new HashMap<>();
+        config.put("field", "_field");
+        config.put("timeInterval", -1);
+        expectThrows(IllegalArgumentException.class, () -> factory.create(null, processorTag, config));
+
+        config.put("field", "_field");
+        config.put("timeInterval", 3601);
+        expectThrows(IllegalArgumentException.class, () -> factory.create(null, processorTag, config));
+    }
+
+    public void testInvalidCacheSize() throws Exception {
+        String processorTag = randomAlphaOfLength(10);
+        Map<String, Object> config = new HashMap<>();
+        config.put("field", "_field");
+
+        config.put("cacheSize", -1);
+        expectThrows(IllegalArgumentException.class, () -> factory.create(null, processorTag, config));
+
+        config.put("field", "_field");
+        config.put("cacheSize", 1024 * 1024 + 1);
+        expectThrows(IllegalArgumentException.class, () -> factory.create(null, processorTag, config));
+    }
+
+    public void testInvalidIgnorePattern() throws Exception {
+        String processorTag = randomAlphaOfLength(10);
+        Map<String, Object> config = new HashMap<>();
+        config.put("field", "_field");
+        config.put("ignorePattern", "*");
+        expectThrows(PatternSyntaxException.class, () -> factory.create(null, processorTag, config));
     }
 
 

@@ -20,9 +20,8 @@ package org.elasticsearch.plugin.ingest.limitrep;
 import org.elasticsearch.ingest.AbstractProcessor;
 import org.elasticsearch.ingest.IngestDocument;
 import org.elasticsearch.ingest.Processor;
-
-import java.io.IOException;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.elasticsearch.ingest.ConfigurationUtils.readIntProperty;
 import static org.elasticsearch.ingest.ConfigurationUtils.readStringProperty;
@@ -33,11 +32,19 @@ public class LimitrepProcessor extends AbstractProcessor {
 
     private final String field;
     private final FieldContentCache cache;
+    private Pattern ignorePattern = null;
 
-    public LimitrepProcessor(String tag, String field, FieldContentCache cache) throws IOException {
+
+
+    public LimitrepProcessor(String tag, String field, FieldContentCache cache) {
         super(tag);
         this.field = field;
         this.cache = cache;
+    }
+
+    public LimitrepProcessor(String tag, String field, FieldContentCache cache, Pattern ignorePattern) {
+        this(tag, field, cache);
+        this.ignorePattern = ignorePattern;
     }
 
     @Override
@@ -46,6 +53,12 @@ public class LimitrepProcessor extends AbstractProcessor {
         if (content == null) {
             return ingestDocument;
         }
+
+        // TODO: use processing chain
+        if (ignorePattern != null) {
+            content = ignorePattern.matcher(content).replaceAll("");
+        }
+
         if (cache.get(field, content) == null) {
             cache.put(field, content);
             return ingestDocument;
@@ -73,8 +86,20 @@ public class LimitrepProcessor extends AbstractProcessor {
             long cacheSize = readIntProperty(TYPE, tag, config, "cacheSize", 1024 * 1024);
             String method = readStringProperty(TYPE, tag, config, "method", "MD5");
 
+            if (timeInterval < 0 || timeInterval > 60 * 60) {
+                throw new IllegalArgumentException("timeInterval must be [0, 3600]");
+            }
+            if (cacheSize <= 0 || cacheSize > 1024 * 1024) {
+                throw new IllegalArgumentException("cacheSize must be (0, 1048576]");
+            }
+
+            String ignorePattern = readStringProperty(TYPE, tag, config, "ignorePattern", "");
+            Pattern p = null;
+            if (!ignorePattern.equals("")) {
+                p = Pattern.compile(ignorePattern);
+            }
             FieldContentCache cache = FieldContentCacheBuilder.build(cacheSize, timeInterval, method);
-            return new LimitrepProcessor(tag, field, cache);
+            return new LimitrepProcessor(tag, field, cache, p);
         }
     }
 }
