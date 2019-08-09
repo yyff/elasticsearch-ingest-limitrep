@@ -58,6 +58,7 @@ GET /my-index/my-type/1
 | cacheSize   |  Size of LRU cache items. Default is 1024 * 1024.   | No |
 | timeInterval   | Filter repeated docs in time interval, Default is 3600s. | No |
 | method   | Hash method of cache key. Supports SHA-1, SHA-256, SHA-384, SHA-512, MD5. Default is MD5.  | No |
+| ignorePattern  | The regex pattern that be used to ignore careless content in field value when judge repeation.  | No |
 
 
 
