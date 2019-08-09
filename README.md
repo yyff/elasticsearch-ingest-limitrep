@@ -54,7 +54,10 @@ GET /my-index/my-type/1
 
 | Parameter | Use | Required |
 | --- | --- | --- |
-| field   | Field name of where to read the content from | Yes |
+| field   | The field's content will be used to filter documents if exists repeation.  | Yes |
+| cacheSize   |  Size of LRU cache items. Default is 1024 * 1024.   | No |
+| timeInterval   | Filter repeated docs in time interval, Default is 3600s. | No |
+| method   | Hash method of cache key. Supports SHA-1, SHA-256, SHA-384, SHA-512, MD5. Default is MD5.  | No |
 
 
 
