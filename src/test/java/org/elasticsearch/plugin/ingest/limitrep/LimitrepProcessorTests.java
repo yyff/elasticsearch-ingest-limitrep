@@ -32,12 +32,12 @@ public class LimitrepProcessorTests extends ESTestCase  {
     private static LimitrepProcessor processor;
     @BeforeClass
     public static void setupProcessor()  {
-        FieldContentCache cache = FieldContentCacheBuilder.build(10, 1000, "SHA-1");
+        FieldContentCache cache = new FieldContentCache(10, 1000, new MDHash("SHA-1"));
         processor = new LimitrepProcessor("", "message", cache);
     }
 
     public static void setupProcessorWithPattern(String ignorePattern)  {
-        FieldContentCache cache = FieldContentCacheBuilder.build(10, 1000, "SHA-1");
+        FieldContentCache cache = new FieldContentCache(10, 1000, new MDHash("SHA-1"));
         Pattern p = Pattern.compile(ignorePattern);
         processor = new LimitrepProcessor("", "message", cache, p);
     }
@@ -45,12 +45,15 @@ public class LimitrepProcessorTests extends ESTestCase  {
         setupProcessor();
         IngestDocument ingestDocument = RandomDocumentPicks.randomIngestDocument(random(),
                 Collections.singletonMap("message", "repeated content should be filtered"));
+        ingestDocument.getSourceAndMetadata().put("_index", "test_index");
+
         IngestDocument targetIngestDocument = processor.execute(ingestDocument);
         assertNotNull(targetIngestDocument);
         assertThat(targetIngestDocument.getFieldValue("message", String.class), equalTo("repeated content should be filtered"));
 
         ingestDocument = RandomDocumentPicks.randomIngestDocument(random(),
                 Collections.singletonMap("message", "test content need be long enough. test content need be long enough"));
+        ingestDocument.getSourceAndMetadata().put("_index", "test_index");
         targetIngestDocument = processor.execute(ingestDocument);
         assertNotNull(targetIngestDocument);
         assertThat(targetIngestDocument.getFieldValue("message", String.class),
@@ -58,6 +61,7 @@ public class LimitrepProcessorTests extends ESTestCase  {
 
         ingestDocument = RandomDocumentPicks.randomIngestDocument(random(),
                 Collections.singletonMap("message", "repeated content should be filtered"));
+        ingestDocument.getSourceAndMetadata().put("_index", "test_index");
         targetIngestDocument = processor.execute(ingestDocument);
         assertNull(targetIngestDocument);
     }
@@ -84,6 +88,7 @@ public class LimitrepProcessorTests extends ESTestCase  {
 
         IngestDocument ingestDocument = RandomDocumentPicks.randomIngestDocument(random(),
                 Collections.singletonMap("message", "[123] repeated content should be filtered"));
+        ingestDocument.getSourceAndMetadata().put("_index", "test_index");
         IngestDocument targetIngestDocument = processor.execute(ingestDocument);
         assertNotNull(targetIngestDocument);
         assertThat(targetIngestDocument.getFieldValue("message", String.class), equalTo("[123] repeated content should be filtered"));
@@ -91,6 +96,7 @@ public class LimitrepProcessorTests extends ESTestCase  {
 
         ingestDocument = RandomDocumentPicks.randomIngestDocument(random(),
                 Collections.singletonMap("message", "[456] repeated content should be filtered"));
+        ingestDocument.getSourceAndMetadata().put("_index", "test_index");
         targetIngestDocument = processor.execute(ingestDocument);
         assertNull(targetIngestDocument);
     }

@@ -32,13 +32,13 @@ public class LimitrepProcessorFactoryTests extends ESTestCase {
 
     private static final LimitrepProcessor.Factory factory = new LimitrepProcessor.Factory();
 
-    public void testNoRequiredField() throws Exception {
+    public void testNoRequiredField()  {
         Map<String, Object> config = new HashMap<>();
         String processorTag = randomAlphaOfLength(10);
 
         expectThrows(ElasticsearchParseException.class, () -> factory.create(null, processorTag, config));
     }
-    public void testBuildDefaults() throws Exception {
+    public void testBuildDefaults()  {
         Map<String, Object> config = new HashMap<>();
         config.put("field", "_field");
 
@@ -49,7 +49,7 @@ public class LimitrepProcessorFactoryTests extends ESTestCase {
         assertThat(processor.getField(), equalTo("_field"));
     }
 
-    public void testInvalidTimeInterval() throws Exception {
+    public void testInvalidTimeInterval()  {
         String processorTag = randomAlphaOfLength(10);
         Map<String, Object> config = new HashMap<>();
         config.put("field", "_field");
@@ -61,7 +61,7 @@ public class LimitrepProcessorFactoryTests extends ESTestCase {
         expectThrows(IllegalArgumentException.class, () -> factory.create(null, processorTag, config));
     }
 
-    public void testInvalidCacheSize() throws Exception {
+    public void testInvalidCacheSize()  {
         String processorTag = randomAlphaOfLength(10);
         Map<String, Object> config = new HashMap<>();
         config.put("field", "_field");
@@ -74,7 +74,7 @@ public class LimitrepProcessorFactoryTests extends ESTestCase {
         expectThrows(IllegalArgumentException.class, () -> factory.create(null, processorTag, config));
     }
 
-    public void testInvalidIgnorePattern() throws Exception {
+    public void testInvalidIgnorePattern()  {
         String processorTag = randomAlphaOfLength(10);
         Map<String, Object> config = new HashMap<>();
         config.put("field", "_field");

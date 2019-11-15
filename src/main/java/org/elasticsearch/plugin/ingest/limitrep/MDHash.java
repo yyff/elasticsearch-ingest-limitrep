@@ -17,13 +17,14 @@
 
 package org.elasticsearch.plugin.ingest.limitrep;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class MDHash implements HashFunction {
+class MDHash implements HashFunction {
     private MessageDigest md;
 
-    public MDHash(String method) {
+    MDHash(String method) {
         try {
             this.md = MessageDigest.getInstance(method);
         } catch (NoSuchAlgorithmException e) {
@@ -31,11 +32,9 @@ public class MDHash implements HashFunction {
         }
     }
 
-    public String hash(String fieldName, String fieldValue) throws Exception {
-        String key = fieldName + "_" + fieldValue;
-        md.update(key.getBytes("utf-8"));
-        return new String(md.digest(), "utf-8");
-//        return Base64.getEncoder().encodeToString(md.digest());
+    public String hash(String content) {
+        md.update(content.getBytes(StandardCharsets.UTF_8));
+        return new String(md.digest(), StandardCharsets.UTF_8);
     }
 
 }

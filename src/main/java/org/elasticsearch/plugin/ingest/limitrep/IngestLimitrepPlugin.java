@@ -27,6 +27,7 @@ import java.util.Map;
 
 public class IngestLimitrepPlugin extends Plugin implements IngestPlugin {
 
+
     @Override
     public Map<String, Processor.Factory> getProcessors(Processor.Parameters parameters) {
         return MapBuilder.<String, Processor.Factory>newMapBuilder()

@@ -16,26 +16,29 @@
  */
 package org.elasticsearch.plugin.ingest.limitrep;
 import org.elasticsearch.common.cache.Cache;
+import org.elasticsearch.common.cache.CacheBuilder;
+import org.elasticsearch.common.unit.TimeValue;
 
 class FieldContentCache {
 
     private final Cache<String, Object> cache;
     private final HashFunction hf;
 
-    FieldContentCache(Cache<String, Object> cache, HashFunction hf) {
-        this.cache = cache;
+    FieldContentCache(long cacheSize, long secondsExpired, HashFunction hf) {
+        this.cache = CacheBuilder.<String, Object>builder().setMaximumWeight(cacheSize).
+                setExpireAfterWrite(TimeValue.timeValueSeconds(secondsExpired)).build();
         this.hf = hf;
     }
 
-    public Object get(String fieldName, String fieldValue) throws Exception {
-        return cache.get(hf.hash(fieldName, fieldValue));
+    Object get(String content) throws Exception {
+        return cache.get(hf.hash(content));
     }
 
-    public void put(String fieldName, String fieldValue) throws Exception {
-        cache.put(hf.hash(fieldName, fieldValue), new Object());
+    void put(String content) throws Exception {
+        cache.put(hf.hash(content), new Object());
     }
 
-    public long getWeight() {
+    long getWeight() {
         return cache.weight();
     }
 

@@ -19,32 +19,32 @@ package org.elasticsearch.plugin.ingest.limitrep;
 import org.elasticsearch.test.ESTestCase;
 
 public class MDHashTests extends ESTestCase {
-    public void testInvalidMethod() throws Exception {
+    public void testInvalidMethod() {
         expectThrows(IllegalArgumentException.class, () -> new MDHash("invalid method"));
     }
 
 
     public void testMDHashMethod() throws Exception {
         HashFunction hf = new MDHash("SHA-1");
-        assertEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname", "fieldvalue"));
-        assertNotEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname2", "fieldvalue2"));
+        assertEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue"));
+        assertNotEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue2"));
 
 
          hf = new MDHash("SHA-256");
-        assertEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname", "fieldvalue"));
-        assertNotEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname2", "fieldvalue2"));
+        assertEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue"));
+        assertNotEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue2"));
 
          hf = new MDHash("SHA-384");
-        assertEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname", "fieldvalue"));
-        assertNotEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname2", "fieldvalue2"));
+        assertEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue"));
+        assertNotEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue2"));
 
          hf = new MDHash("SHA-512");
-        assertEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname", "fieldvalue"));
-        assertNotEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname2", "fieldvalue2"));
+        assertEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue"));
+        assertNotEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue2"));
 
          hf = new MDHash("MD5");
-        assertEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname", "fieldvalue"));
-        assertNotEquals(hf.hash("fieldname", "fieldvalue"), hf.hash("fieldname2", "fieldvalue2"));
+        assertEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue"));
+        assertNotEquals(hf.hash("fieldvalue"), hf.hash("fieldvalue2"));
 
     }
 

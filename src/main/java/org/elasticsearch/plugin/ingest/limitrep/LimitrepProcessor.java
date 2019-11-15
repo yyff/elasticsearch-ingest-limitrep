@@ -34,7 +34,9 @@ public class LimitrepProcessor extends AbstractProcessor {
     private final FieldContentCache cache;
     private Pattern ignorePattern = null;
 
-
+    private static String concatHashKey(String index, String field, String fieldValue) {
+        return String.format("%s_%s_%s", index, field, fieldValue);
+    }
 
     public LimitrepProcessor(String tag, String field, FieldContentCache cache) {
         super(tag);
@@ -53,14 +55,16 @@ public class LimitrepProcessor extends AbstractProcessor {
         if (content == null) {
             return ingestDocument;
         }
+        String index = (String)ingestDocument.getSourceAndMetadata().get(IngestDocument.MetaData.INDEX.getFieldName());
 
         // TODO: use processing chain
         if (ignorePattern != null) {
             content = ignorePattern.matcher(content).replaceAll("");
         }
 
-        if (cache.get(field, content) == null) {
-            cache.put(field, content);
+        String key = concatHashKey(index, field, content);
+        if (cache.get(key) == null) {
+            cache.put(key);
             return ingestDocument;
         }
 
@@ -80,25 +84,28 @@ public class LimitrepProcessor extends AbstractProcessor {
 
         @Override
         public LimitrepProcessor create(Map<String, Processor.Factory> factories, String tag, Map<String, Object> config) 
-            throws Exception {
+            throws IllegalArgumentException {
             String field = readStringProperty(TYPE, tag, config, "field");
             long timeInterval = readIntProperty(TYPE, tag, config, "timeInterval", 3600);
             long cacheSize = readIntProperty(TYPE, tag, config, "cacheSize", 1024 * 1024);
             String method = readStringProperty(TYPE, tag, config, "method", "MD5");
 
-            if (timeInterval < 0 || timeInterval > 60 * 60) {
-                throw new IllegalArgumentException("timeInterval must be [0, 3600]");
+            // check parameters
+            if (timeInterval <= 0 || timeInterval > 60 * 60) {
+                throw new IllegalArgumentException("timeInterval must be in [0, 3600]");
             }
             if (cacheSize <= 0 || cacheSize > 1024 * 1024) {
-                throw new IllegalArgumentException("cacheSize must be (0, 1048576]");
+                throw new IllegalArgumentException("cacheSize must be in (0, 1048576]");
             }
+
 
             String ignorePattern = readStringProperty(TYPE, tag, config, "ignorePattern", "");
             Pattern p = null;
             if (!ignorePattern.equals("")) {
                 p = Pattern.compile(ignorePattern);
             }
-            FieldContentCache cache = FieldContentCacheBuilder.build(cacheSize, timeInterval, method);
+
+            FieldContentCache cache = new FieldContentCache(cacheSize, timeInterval, new MDHash(method));
             return new LimitrepProcessor(tag, field, cache, p);
         }
     }

@@ -16,71 +16,73 @@
  */
 package org.elasticsearch.plugin.ingest.limitrep;
 
+
 import org.elasticsearch.test.ESTestCase;
 
 public class FieldContentCacheTests extends ESTestCase {
 
 
     public void testCacheHit() throws Exception {
-        FieldContentCache cache = FieldContentCacheBuilder.build(10, 100, "SHA-1");
-        cache.put("message", "test content");
-        assertNotNull(cache.get("message", "test content"));
+        FieldContentCache cache = new FieldContentCache(10, 100, new MDHash("SHA-1"));
+//        FieldContentCache cache = new FieldContentCache(10, 100, new MDHash("SHA-1"));
+        cache.put("test content");
+        assertNotNull(cache.get("test content"));
     }
 
     public void testCacheWeight() throws Exception {
-        FieldContentCache cache = FieldContentCacheBuilder.build(10, 100, "SHA-1");
+        FieldContentCache cache = new FieldContentCache(10, 100, new MDHash("SHA-1"));
         assertEquals(cache.getWeight(), 0);
 
-        cache.put("message", "test content");
+        cache.put("test content");
         assertEquals(cache.getWeight(), 1);
-        cache.put("message", "test content");
+        cache.put("test content");
         assertEquals(cache.getWeight(), 1);
-        cache.put("message", "another test content");
+        cache.put("another test content");
         assertEquals(cache.getWeight(), 2);
     }
 
     public void testCacheMiss() throws Exception {
-        FieldContentCache cache = FieldContentCacheBuilder.build(10, 100, "SHA-1");
-        cache.put("message", "test content");
-        assertNull(cache.get("message", "another test content"));
+        FieldContentCache cache = new FieldContentCache(10, 100, new MDHash("SHA-1"));
+        cache.put("test content");
+        assertNull(cache.get("another test content"));
     }
 
 
     public void testCacheMissByTimeout() throws Exception {
-        FieldContentCache cache = FieldContentCacheBuilder.build(10, 1, "SHA-1");
-        cache.put("message", "test content");
+        FieldContentCache cache = new FieldContentCache(10, 1, new MDHash("SHA-1"));
+        cache.put("test content");
         Thread.sleep(1000 );
-        assertNull(cache.get("message", "test content"));
+        assertNull(cache.get("test content"));
     }
 
     public void testCacheMissByFull() throws Exception {
-        FieldContentCache cache = FieldContentCacheBuilder.build(2, 1, "SHA-1");
-        cache.put("message", "test content");
-        cache.put("message", "test content2");
-        cache.put("message", "test content3");
-        assertNull(cache.get("message", "test content"));
+        FieldContentCache cache = new FieldContentCache(2, 1, new MDHash("SHA-1"));
+        cache.put("test content");
+        cache.put("test content2");
+        cache.put("test content3");
+        assertNull(cache.get("test content"));
     }
 
     public void testCacheMethod() throws Exception {
-        FieldContentCache cache = FieldContentCacheBuilder.build(10, 100, "SHA-1");
-        cache.put("message", "test content");
-        assertNotNull(cache.get("message", "test content"));
+        FieldContentCache cache = new FieldContentCache(10, 100, new MDHash("SHA-1"));
+        cache.put("test content");
+        assertNotNull(cache.get("test content"));
 
-        cache = FieldContentCacheBuilder.build(10, 100, "SHA-256");
-        cache.put("message", "test content");
-        assertNotNull(cache.get("message", "test content"));
+        cache = new FieldContentCache(10, 100, new MDHash("SHA-256"));
+        cache.put("test content");
+        assertNotNull(cache.get("test content"));
 
-        cache = FieldContentCacheBuilder.build(10, 100, "SHA-384");
-        cache.put("message", "test content");
-        assertNotNull(cache.get("message", "test content"));
+        cache = new FieldContentCache(10, 100, new MDHash("SHA-384"));
+        cache.put("test content");
+        assertNotNull(cache.get("test content"));
 
-        cache = FieldContentCacheBuilder.build(10, 100, "SHA-512");
-        cache.put("message", "test content");
-        assertNotNull(cache.get("message", "test content"));
+        cache = new FieldContentCache(10, 100, new MDHash("SHA-512"));
+        cache.put("test content");
+        assertNotNull(cache.get("test content"));
 
-        cache = FieldContentCacheBuilder.build(10, 100, "MD5");
-        cache.put("message", "test content");
-        assertNotNull(cache.get("message", "test content"));
+        cache = new FieldContentCache(10, 100, new MDHash("MD5"));
+        cache.put("test content");
+        assertNotNull(cache.get("test content"));
     }
 
 

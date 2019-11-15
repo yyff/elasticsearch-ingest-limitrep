@@ -16,8 +16,8 @@
  */
 package org.elasticsearch.plugin.ingest.limitrep;
 
-public interface HashFunction {
-    String hash(String fieldName, String fieldValue) throws Exception;
+interface HashFunction {
+    String hash(String content);
 }
 
 
